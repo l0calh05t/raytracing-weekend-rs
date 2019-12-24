@@ -1,6 +1,6 @@
 # Ray Tracing in One Weekend
 
-This is a simple Rust implementation of [Peter Shirley's “Ray Tracing in One Weekend”](https://raytracing.github.io/books/RayTracingInOneWeekend.html) in Rust.
+This is a simple Rust implementation of [Peter Shirley's “Ray Tracing in One Weekend”](https://raytracing.github.io/books/RayTracingInOneWeekend.html).
 
 ![Sample output image](output.jpg)
 
