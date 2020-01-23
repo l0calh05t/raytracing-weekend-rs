@@ -41,7 +41,7 @@ fn color<H: Hittable>(ray: &Ray, world: &H, depth: i32) -> Vec3 {
 fn main() -> std::io::Result<()> {
 	let nx = 640;
 	let ny = 320;
-	let ns = 128;
+	let ns = if cfg!(feature = "use_oidn") { 1 } else { 128 };
 
 	let world = random_scene();
 
@@ -78,6 +78,43 @@ fn main() -> std::io::Result<()> {
 			})
 		});
 	let img = img;
+
+	#[cfg(feature = "use_oidn")]
+	let img = {
+		let in_slice_3 = img.view().to_slice().unwrap();
+		let in_slice = unsafe {
+			core::slice::from_raw_parts(
+				&in_slice_3[0] as *const _ as *const f32,
+				3 * in_slice_3.len(),
+			)
+		};
+
+		let mut out_img = unsafe { Array::uninitialized((ny, nx)) };
+
+		{
+			let mut out_view = out_img.view_mut();
+			let out_slice_3 = out_view.as_slice_mut().unwrap();
+			let out_slice = unsafe {
+				core::slice::from_raw_parts_mut(
+					&mut out_slice_3[0] as *mut _ as *mut f32,
+					3 * out_slice_3.len(),
+				)
+			};
+
+			let device = oidn::Device::new();
+			let mut filter = oidn::RayTracing::new(&device);
+			filter.set_img_dims(nx, ny);
+
+			filter
+				.execute(in_slice, out_slice)
+				.map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", e)))?;
+			device
+				.get_error()
+				.map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", e)))?;
+		}
+
+		out_img
+	};
 
 	// write a binary bitmap instead of ascii ppm, because text formats are never the right choice
 	write_bmp("output.bmp", img.view())?;
