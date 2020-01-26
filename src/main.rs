@@ -2,6 +2,8 @@ use nd::parallel::prelude::*;
 use nd::prelude::*;
 use ndarray as nd;
 
+use std::time::Instant;
+
 mod camera;
 mod hittable;
 mod materials;
@@ -48,6 +50,9 @@ fn debug_into_io<E: core::fmt::Debug>(error: E) -> std::io::Error {
 }
 
 fn main() -> std::io::Result<()> {
+	let mut instants = Vec::new();
+	instants.reserve(5);
+
 	let mut args = std::env::args().skip(1);
 	let nx = if let Some(s) = args.next() {
 		s.parse().map_err(display_into_io)?
@@ -83,6 +88,7 @@ fn main() -> std::io::Result<()> {
 		distance_to_focus,
 	);
 
+	instants.push((Instant::now(), "start"));
 	// use rayon to parallelize tracing over scan lines (better schemes possible, this was an easy, quick way)
 	let mut img = unsafe { Array::uninitialized((ny, nx)) };
 	img.axis_iter_mut(Axis(0))
@@ -103,8 +109,13 @@ fn main() -> std::io::Result<()> {
 		});
 	let img = img;
 
+	instants.push((Instant::now(), "render"));
+
 	#[cfg(feature = "use_oidn")]
 	let img = {
+		write_bmp("output_pre_oidn.bmp", img.view())?;
+		instants.push((Instant::now(), "write (unfiltered)"));
+
 		let in_slice_3 = img.view().to_slice().unwrap();
 
 		// sanity checks to ensure alignment, size and element order of Vec3 match expectations on
@@ -149,11 +160,23 @@ fn main() -> std::io::Result<()> {
 			device.get_error().map_err(debug_into_io)?;
 		}
 
+		instants.push((Instant::now(), "denoise"));
+
 		out_img
 	};
 
 	// write a binary bitmap instead of ascii ppm, because text formats are never the right choice
 	write_bmp("output.bmp", img.view())?;
+
+	instants.push((Instant::now(), "write"));
+
+	for k in 0..(instants.len() - 1) {
+		println!(
+			"{:?} {}",
+			instants[k + 1].0.duration_since(instants[k].0),
+			instants[k + 1].1
+		);
+	}
 
 	Ok(())
 }
