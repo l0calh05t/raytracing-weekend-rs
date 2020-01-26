@@ -38,10 +38,34 @@ fn color<H: Hittable>(ray: &Ray, world: &H, depth: i32) -> Vec3 {
 	Vec3::new(1.0, 1.0, 1.0).lerp(&Vec3::new(0.5, 0.7, 1.0), t)
 }
 
+fn display_into_io<E: core::fmt::Display>(error: E) -> std::io::Error {
+	std::io::Error::new(std::io::ErrorKind::Other, format!("{}", error))
+}
+
+#[cfg(feature = "use_oidn")]
+fn debug_into_io<E: core::fmt::Debug>(error: E) -> std::io::Error {
+	std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", error))
+}
+
 fn main() -> std::io::Result<()> {
-	let nx = 640;
-	let ny = 320;
-	let ns = if cfg!(feature = "use_oidn") { 1 } else { 128 };
+	let mut args = std::env::args().skip(1);
+	let nx = if let Some(s) = args.next() {
+		s.parse().map_err(display_into_io)?
+	} else {
+		640
+	};
+	let ny = if let Some(s) = args.next() {
+		s.parse().map_err(display_into_io)?
+	} else {
+		320
+	};
+	let ns = if let Some(s) = args.next() {
+		s.parse().map_err(display_into_io)?
+	} else if cfg!(feature = "use_oidn") {
+		1
+	} else {
+		128
+	};
 
 	let world = random_scene();
 
@@ -121,12 +145,8 @@ fn main() -> std::io::Result<()> {
 			let mut filter = oidn::RayTracing::new(&device);
 			filter.set_img_dims(nx, ny);
 
-			filter
-				.execute(in_slice, out_slice)
-				.map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", e)))?;
-			device
-				.get_error()
-				.map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, format!("{:?}", e)))?;
+			filter.execute(in_slice, out_slice).map_err(debug_into_io)?;
+			device.get_error().map_err(debug_into_io)?;
 		}
 
 		out_img
