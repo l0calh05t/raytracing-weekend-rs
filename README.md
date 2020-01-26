@@ -36,3 +36,9 @@ The choice to use trait objects was mainly because this was an exercise in using
 
 There is currently one line of `unsafe` code in here, probably because I used [rayon](https://github.com/rayon-rs/rayon)/[ndarray](https://github.com/rust-ndarray/ndarray) incorrectly.
 Suggestions are welcome.
+
+## Open Image Denoise
+
+When the `use_oidn` feature is enabled, `raytracing-weekend-rs` uses [Intel®'s Open Image Denoise library](https://github.com/OpenImageDenoise/oidn/) via [Will Usher's oidn-rs bindings](https://github.com/Twinklebear/oidn-rs) to reduce the amount of noise.
+
+When enabled, the `OIDN_DIR` environment variable must be set to the root of the Open Image Denoise installation for building and `Path`/`LD_LIBRARY_PATH` must be set so that the corresponding DLLs/SOs are found at runtime.
