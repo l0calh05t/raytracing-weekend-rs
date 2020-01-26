@@ -11,7 +11,7 @@ pub fn write_bmp(file_name: &str, image: ArrayView2<Vec3>) -> std::io::Result<()
 	let data_offset: u32 = 14 + 40;
 	let total_bytes: u32 = data_offset + (image.shape()[0] * line_bytes) as u32;
 
-	let mut output = std::fs::File::create(file_name)?;
+	let mut output = std::io::BufWriter::new(std::fs::File::create(file_name)?);
 
 	// main bitmap header
 	output.write_all(b"BM")?;
