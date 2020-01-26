@@ -82,6 +82,22 @@ fn main() -> std::io::Result<()> {
 	#[cfg(feature = "use_oidn")]
 	let img = {
 		let in_slice_3 = img.view().to_slice().unwrap();
+
+		// sanity checks to ensure alignment, size and element order of Vec3 match expectations on
+		// f32 order in oidn, as the following cast is quite unsafe
+		assert_eq!(
+			std::mem::size_of_val(&in_slice_3[0]),
+			3 * std::mem::size_of::<f32>()
+		);
+		assert_eq!(
+			std::mem::align_of_val(&in_slice_3[0]),
+			std::mem::align_of::<f32>()
+		);
+		assert_eq!(
+			&in_slice_3[0].z as *const f32 as usize - &in_slice_3[0].x as *const f32 as usize,
+			2 * std::mem::size_of::<f32>()
+		);
+
 		let in_slice = unsafe {
 			core::slice::from_raw_parts(
 				&in_slice_3[0] as *const _ as *const f32,
