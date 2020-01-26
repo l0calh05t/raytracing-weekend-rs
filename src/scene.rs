@@ -5,8 +5,8 @@ use crate::materials::*;
 use crate::sphere::Sphere;
 use crate::vec::*;
 
-pub fn random_scene() -> Vec<Box<dyn Hittable + Sync + Send>> {
-	let mut list: Vec<Box<dyn Hittable + Sync + Send>> = Vec::new();
+pub fn random_scene() -> Vec<Box<dyn Hittable + Sync>> {
+	let mut list: Vec<Box<dyn Hittable + Sync>> = Vec::new();
 	let ground_sphere_radius = 1000.0;
 	list.push(Box::new(Sphere {
 		center: Vec3::new(0.0, -ground_sphere_radius, 0.0),
