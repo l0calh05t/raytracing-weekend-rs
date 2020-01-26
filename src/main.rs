@@ -170,13 +170,10 @@ fn main() -> std::io::Result<()> {
 
 	instants.push((Instant::now(), "write"));
 
-	for k in 0..(instants.len() - 1) {
-		println!(
-			"{:?} {}",
-			instants[k + 1].0.duration_since(instants[k].0),
-			instants[k + 1].1
-		);
-	}
+	instants
+		.iter()
+		.zip(instants.iter().skip(1))
+		.for_each(|((t0, _), (t1, s))| println!("{:?} {}", t1.duration_since(*t0), s));
 
 	Ok(())
 }
