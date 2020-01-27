@@ -1,10 +1,9 @@
-sudo: false
 language: rust
+os: linux
 cache: cargo
-matrix:
+jobs:
   include:
-    - os: linux
-      dist: xenial
+    - dist: xenial
       rust: stable
       addons:
         apt:
