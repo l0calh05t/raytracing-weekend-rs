@@ -7,11 +7,13 @@ pub fn write_bmp(file_name: &str, image: ArrayView2<Vec3>) -> std::io::Result<()
 	use byteorder::{LittleEndian, WriteBytesExt};
 	use std::io::Write;
 
-	let line_bytes = 4 * ((3 * image.shape()[1] + 3) / 4);
+	let line_data_bytes = 3 * image.shape()[1];
+	let line_bytes = 4 * ((line_data_bytes + 3) / 4);
+	let padding = &b"\0\0\0"[..(line_bytes - line_data_bytes)];
 	let data_offset: u32 = 14 + 40;
 	let total_bytes: u32 = data_offset + (image.shape()[0] * line_bytes) as u32;
 
-	let mut output = std::io::BufWriter::new(std::fs::File::create(file_name)?);
+	let mut output = std::io::BufWriter::with_capacity(4 << 20, std::fs::File::create(file_name)?);
 
 	// main bitmap header
 	output.write_all(b"BM")?;
@@ -41,11 +43,7 @@ pub fn write_bmp(file_name: &str, image: ArrayView2<Vec3>) -> std::io::Result<()
 				(color.x.max(0.0).min(1.0).sqrt() * 255.0).round() as u8,
 			])?;
 		}
-
-		let current_bytes = 3 * image.shape()[1];
-		if current_bytes < line_bytes {
-			output.write_all(&b"\0".repeat(line_bytes - current_bytes))?;
-		}
+		output.write_all(padding)?;
 	}
 
 	output.flush()?;
