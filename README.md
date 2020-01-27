@@ -1,5 +1,7 @@
 # Ray Tracing in One Weekend
 
+[![Build Status](https://api.travis-ci.org/l0calh05t/raytracing-weekend-rs.svg?branch=master)](https://travis-ci.org/l0calh05t/raytracing-weekend-rs)
+
 This is a simple Rust implementation of [Peter Shirley's “Ray Tracing in One Weekend.”](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 
 ![Sample output image](output.jpg)
