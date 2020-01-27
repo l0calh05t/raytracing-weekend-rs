@@ -15,6 +15,7 @@ matrix:
       rust: stable
     - os: windows
       rust: stable
+before_script:
   - rustup component add clippy
 script:
   - cargo build
