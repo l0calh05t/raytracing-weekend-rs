@@ -51,7 +51,8 @@ fn debug_into_io<E: core::fmt::Debug>(error: E) -> std::io::Error {
 
 fn main() -> std::io::Result<()> {
 	let mut instants = Vec::new();
-	instants.reserve(5);
+	instants.reserve(6);
+	instants.push((Instant::now(), ""));
 
 	let mut args = std::env::args().skip(1);
 	let nx = if let Some(s) = args.next() {
@@ -88,7 +89,7 @@ fn main() -> std::io::Result<()> {
 		distance_to_focus,
 	);
 
-	instants.push((Instant::now(), "start"));
+	instants.push((Instant::now(), "initialization"));
 	// use rayon to parallelize tracing over scan lines (better schemes possible, this was an easy, quick way)
 	let mut img = unsafe { Array::uninitialized((ny, nx)) };
 	img.axis_iter_mut(Axis(0))
