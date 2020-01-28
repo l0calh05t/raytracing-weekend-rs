@@ -75,10 +75,10 @@ impl Aabb {
 	}
 
 	pub fn volume(&self) -> f32 {
-		let delta = self.max - self.min;
-		if delta.x <= 0.0 || delta.y <= 0.0 || delta.z <= 0.0 {
+		if self.max.x <= self.min.x || self.max.y <= self.min.y || self.max.z <= self.min.z {
 			0.0
 		} else {
+			let delta = self.max - self.min;
 			delta.dot(&delta)
 		}
 	}
