@@ -90,6 +90,8 @@ fn main() -> std::io::Result<()> {
 	);
 
 	instants.push((Instant::now(), "initialization"));
+	let world = hittable::Bvh::new(world);
+	instants.push((Instant::now(), "bvh"));
 	// use rayon to parallelize tracing over scan lines (better schemes possible, this was an easy, quick way)
 	let mut img = unsafe { Array::uninitialized((ny, nx)) };
 	img.axis_iter_mut(Axis(0))

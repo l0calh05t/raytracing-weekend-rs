@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::hittable::{HitRecord, Hittable};
+use crate::hittable::{Aabb, HitRecord, Hittable};
 use crate::materials::Material;
 use crate::ray::Ray;
 use crate::vec::*;
@@ -35,5 +35,13 @@ impl Hittable for Sphere {
 			n: Unit::new_unchecked((hit_position - self.center) / self.radius),
 			material: &*self.material,
 		})
+	}
+
+	fn aabb(&self) -> Aabb {
+		let radius3 = Vec3::new(self.radius, self.radius, self.radius);
+		Aabb {
+			min: self.center - radius3,
+			max: self.center + radius3,
+		}
 	}
 }
