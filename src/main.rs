@@ -91,24 +91,26 @@ fn main() -> std::io::Result<()> {
 
 	instants.push((Instant::now(), "initialization"));
 	// use rayon to parallelize tracing over scan lines (better schemes possible, this was an easy, quick way)
-	let mut img = unsafe { Array::uninitialized((ny, nx)) };
+	let mut img = Array::uninit((ny, nx));
 	img.axis_iter_mut(Axis(0))
 		.into_par_iter()
 		.enumerate()
 		.for_each(|(j, mut line)| {
 			let mut rng = rand::thread_rng();
 			line.iter_mut().enumerate().for_each(|(i, pixel)| {
-				*pixel = (0..ns)
-					.map(|_| {
-						let u = (i as f32 + rng.gen::<f32>()) / nx as f32;
-						let v = (j as f32 + rng.gen::<f32>()) / ny as f32;
-						let ray = camera.get_ray(u, v);
-						color(&ray, &world, 0)
-					})
-					.sum::<Vec3>() / ns as f32;
+				pixel.write(
+					(0..ns)
+						.map(|_| {
+							let u = (i as f32 + rng.gen::<f32>()) / nx as f32;
+							let v = (j as f32 + rng.gen::<f32>()) / ny as f32;
+							let ray = camera.get_ray(u, v);
+							color(&ray, &world, 0)
+						})
+						.sum::<Vec3>() / ns as f32,
+				);
 			})
 		});
-	let img = img;
+	let img = unsafe { img.assume_init() };
 
 	instants.push((Instant::now(), "render"));
 
