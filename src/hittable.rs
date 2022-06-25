@@ -23,7 +23,7 @@ impl<H: Hittable> Hittable for Vec<H> {
 			} else {
 				t_max
 			};
-			if let Some(new_hit) = hittable.hit(&ray, t_min, closest_so_far) {
+			if let Some(new_hit) = hittable.hit(ray, t_min, closest_so_far) {
 				hit = Some(new_hit);
 			};
 		}
@@ -33,6 +33,6 @@ impl<H: Hittable> Hittable for Vec<H> {
 
 impl<H: Hittable + ?Sized> Hittable for Box<H> {
 	fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-		self.as_ref().hit(&ray, t_min, t_max)
+		self.as_ref().hit(ray, t_min, t_max)
 	}
 }
