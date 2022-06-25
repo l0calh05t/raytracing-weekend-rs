@@ -145,7 +145,7 @@ fn main() -> std::io::Result<()> {
 			)
 		};
 
-		let mut out_img = unsafe { Array::uninitialized((ny, nx)) };
+		let mut out_img = Array::zeros((ny, nx));
 
 		{
 			let mut out_view = out_img.view_mut();
